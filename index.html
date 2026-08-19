@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Helix Display</title>
+
+    <!-- PWA-inställningar för fristående app på iPhone -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Helix Display">
+
+    <style>
+        :root {
+            --bg-color: #0a0a0a;
+            --panel-color: #161616;
+            --text-muted: #444444;
+            --active-bg: #c1ffb2; /* Ljusgrön färg */
+            --active-text: #051c00; /* Mörkgrön text */
+            --border-color: #222222;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #ffffff;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
+            padding: 10px;
+        }
+
+        /* Minimalistiskt verktygsfält i kanten */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 10px;
+            margin-bottom: 8px;
+            background: #111;
+            border-radius: 6px;
+            font-size: 11px;
+        }
+
+        .status {
+            color: #ff3b30;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status.connected {
+            color: #4cd964;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn {
+            background: #222;
+            color: #aaa;
+            border: 1px solid #333;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* HUVUDLAYOUT: Knapparna dominerar skärmen */
+        .grid-container {
+            display: flex;
+            flex-direction: row; 
+            gap: 10px;
+            flex-grow: 1; 
+            width: 100%;
+            height: 65%; /* Justerad för att ge plats åt större stödknappar */
+        }
+
+        /* Varje enskild knapp (Scribble Strip) */
+        .strip {
+            flex: 1;
+            min-width: 0;
+            background-color: var(--panel-color);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            padding: 15px;
+            height: 100%; 
+        }
+
+        .strip-index {
+            position: absolute;
+            top: 10px;
+            left: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-muted);
+        }
+
+        .strip-name {
+            font-size: 4.5vw; 
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        .strip.active {
+            background-color: var(--active-bg);
+            border-color: var(--active-bg);
+            box-shadow: 0 0 30px rgba(193, 255, 178, 0.4);
+        }
+
+        .strip.active .strip-index {
+            color: var(--active-text);
+            opacity: 0.5;
+        }
+
+        .strip.active .strip-name {
+            color: var(--active-text);
+        }
+
+        /* JUSTERAT: Större och tydligare stödknappar i botten */
+        .simulator {
+            margin-top: 12px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding-bottom: 5px;
+        }
+
+        .sim-btn {
+            background: #222224;
+            color: #ffffff;
+            border: 1px solid #333336;
+            padding: 16px 0; /* Ökad padding för en mycket tjockare och större knapp */
+            font-size: 14px; /* Större och tydligare text */
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            transition: background 0.1s;
+        }
+
+        .sim-btn:active {
+            background: #333336;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="file-input-wrapper">
+            <button class="btn">Import Helix File (.hlx/.hls)</button>
+            <input type="file" id="fileInput" accept=".hlx,.hls">
+        </div>
+        <div id="midiStatus" class="status">MIDI: SEARCHING...</div>
+    </header>
+
+    <!-- De 4 stora knapparna i en rad -->
+    <div class="grid-container">
+        <div class="strip" id="strip0" onclick="fakeMIDI(lastActiveBank * 4 + 0)">
+            <div class="strip-index" id="idx0">1A</div>
+            <div class="strip-name" id="name0">PRESET A</div>
+        </div>
+        <div class="strip" id="strip1" onclick="fakeMIDI(lastActiveBank * 4 + 1)">
+            <div class="strip-index" id="idx1">1B</div>
+            <div class="strip-name" id="name1">PRESET B</div>
+        </div>
+        <div class="strip" id="strip2" onclick="fakeMIDI(lastActiveBank * 4 + 2)">
+            <div class="strip-index" id="idx2">1C</div>
+            <div class="strip-name" id="name2">PRESET C</div>
+        </div>
+        <div class="strip" id="strip3" onclick="fakeMIDI(lastActiveBank * 4 + 3)">
+            <div class="strip-index" id="idx3">1D</div>
+            <div class="strip-name" id="name3">PRESET D</div>
+        </div>
+    </div>
+
+    <!-- UTÖKADE STÖDKNAPPAR -->
+    <div class="simulator">
+        <button class="sim-btn" onclick="fakeMIDI(0)">Bank 1 (PC 0)</button>
+        <button class="sim-btn" onclick="fakeMIDI(4)">Bank 2 (PC 4)</button>
+        <button class="sim-btn" onclick="fakeMIDI(8)">Bank 3 (PC 8)</button>
+        <button class="sim-btn" onclick="fakeMIDI(12)">Bank 4 (PC 12)</button>
+    </div>
+
+    <script>
+        let presetMap = {};
+        let lastActivePC = 0;
+        let lastActiveBank = 0;
+
+        function initFallbackPresets() {
+            for (let i = 0; i < 128; i++) {
+                let bankNum = Math.floor(i / 4) + 1;
+                let bankChar = String.fromCharCode(65 + (i % 4));
+                presetMap[i] = `${bankNum}${bankChar} Preset`;
+            }
+        }
+
+        if (localStorage.getItem('helixPresets')) {
+            presetMap = JSON.parse(localStorage.getItem('helixPresets'));
+        } else {
+            initFallbackPresets();
+        }
+
+        // Filimport
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files;
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = JSON.parse(evt.target.result);
+                    if (data.meta && data.meta.name) {
+                        presetMap = data.meta.name;
+                        alert(`Imported single preset: "${data.meta.name}" to 1A`);
+                    } else if (data.presets && Array.isArray(data.presets)) {
+                        data.presets.forEach((p, index) => {
+                            if (p && p.meta && p.meta.name && index < 128) {
+                                presetMap[index] = p.meta.name;
+                            }
+                        });
+                        alert(`Successfully imported setlist with ${data.presets.length} presets!`);
+                    }
+                    localStorage.setItem('helixPresets', JSON.stringify(presetMap));
+                    updateDisplay(lastActivePC);
+                } catch (error) {
+                    alert("Error reading file. Please use a valid Helix JSON file.");
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // Uppdatera skärmen
+        function updateDisplay(currentPC) {
+            lastActivePC = currentPC;
+            lastActiveBank = Math.floor(currentPC / 4);
+            
+            const startPCInBank = lastActiveBank * 4;
+            const bankDisplayNum = lastActiveBank + 1;
+
+            for (let i = 0; i < 4; i++) {
+                const targetPC = startPCInBank + i;
+                const stripElement = document.getElementById(`strip${i}`);
+                const nameElement = document.getElementById(`name${i}`);
+                const idxElement = document.getElementById(`idx${i}`);
+
+                idxElement.innerText = `${bankDisplayNum}${String.fromCharCode(65 + i)}`;
+                nameElement.innerText = presetMap[targetPC] || "Empty";
+
+                if (targetPC === currentPC) {
+                    stripElement.classList.add('active');
+                } else {
+                    stripElement.classList.remove('active');
+                }
+            }
+        }
+
+        // Web MIDI API
+        if (navigator.requestMIDIAccess) {
+            navigator.requestMIDIAccess({ bluetooth: true }).then(onMIDISuccess, () => {});
+        }
+
+        function onMIDISuccess(midiAccess) {
+            const statusDiv = document.getElementById('midiStatus');
+            const inputs = midiAccess.inputs.values();
