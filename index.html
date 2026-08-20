@@ -13,11 +13,11 @@
     <style>
         :root {
             --bg-color: #0a0a0a;
-            --panel-color: #161616;
-            --text-muted: #444444;
-            --active-bg: #c1ffb2; /* Ljusgrön färg */
-            --active-text: #051c00; /* Mörkgrön text */
+            --panel-color: #b0b0b0; /* Ljusgrå för inaktiva presets */
+            --text-main: #000000;  /* Svart text */
+            --active-bg: #c1ffb2;  /* Ljusgrön färg för aktiva val */
             --border-color: #222222;
+            --snap-inactive: #333336; /* Mörkgrå för inaktiva snapshots */
         }
 
         * {
@@ -37,10 +37,9 @@
             flex-direction: column;
             height: 100vh;
             width: 100vw;
-            padding: 10px;
+            padding: calc(env(safe-area-inset-top) + 10px) 10px calc(env(safe-area-inset-bottom) + 10px) 10px;
         }
 
-        /* Minimalistiskt verktygsfält i kanten */
         header {
             display: flex;
             justify-content: space-between;
@@ -87,20 +86,28 @@
             width: 100%;
         }
 
-        /* HUVUDLAYOUT: Knapparna dominerar skärmen */
+        /* HUVUDGRID: 4 kolumner, en för varje preset-plats */
         .grid-container {
-            display: flex;
-            flex-direction: row; 
-            gap: 10px;
-            flex-grow: 1; 
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            flex-grow: 1;
             width: 100%;
-            height: 65%; /* Justerad för att ge plats åt större stödknappar */
+            height: 85%; /* Upptar nu nästan hela skärmen */
+            margin-bottom: 5px;
         }
 
-        /* Varje enskild knapp (Scribble Strip) */
+        /* Kolumn-wrapper som håller ihop 1 Preset + dess 4 Snapshots */
+        .channel-column {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            gap: 10px;
+        }
+
+        /* PRESET-KNAPP (3/4 av höjden) */
         .strip {
-            flex: 1;
-            min-width: 0;
+            height: 75%; 
             background-color: var(--panel-color);
             border: 2px solid var(--border-color);
             border-radius: 10px;
@@ -111,24 +118,24 @@
             position: relative;
             cursor: pointer;
             padding: 15px;
-            height: 100%; 
         }
 
         .strip-index {
             position: absolute;
-            top: 10px;
+            top: 12px;
             left: 12px;
             font-size: 14px;
             font-weight: bold;
-            color: var(--text-muted);
+            color: var(--text-main);
+            opacity: 0.6;
         }
 
         .strip-name {
-            font-size: 4.5vw; 
+            font-size: 4.2vw; 
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: var(--text-muted);
+            color: var(--text-main);
             text-align: center;
             white-space: nowrap;
             overflow: hidden;
@@ -136,45 +143,40 @@
             width: 100%;
         }
 
+        /* Aktiv Preset */
         .strip.active {
             background-color: var(--active-bg);
             border-color: var(--active-bg);
-            box-shadow: 0 0 30px rgba(193, 255, 178, 0.4);
+            box-shadow: 0 0 30px rgba(193, 255, 178, 0.3);
         }
 
         .strip.active .strip-index {
-            color: var(--active-text);
-            opacity: 0.5;
+            opacity: 1;
         }
 
-        .strip.active .strip-name {
-            color: var(--active-text);
-        }
-
-        /* JUSTERAT: Större och tydligare stödknappar i botten */
-        .simulator {
-            margin-top: 12px;
+        /* SNAPSHOT-RAD (1/4 av höjden) */
+        .snapshot-row {
+            height: 25%;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            padding-bottom: 5px;
+            gap: 6px;
         }
 
-        .sim-btn {
-            background: #222224;
-            color: #ffffff;
-            border: 1px solid #333336;
-            padding: 16px 0; /* Ökad padding för en mycket tjockare och större knapp */
-            font-size: 14px; /* Större och tydligare text */
-            font-weight: bold;
-            border-radius: 8px;
+        /* Små snapshot-knappar utan text */
+        .snap-btn {
+            background-color: var(--snap-inactive);
+            border: 1px solid #222;
+            border-radius: 6px;
             cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
-            transition: background 0.1s;
+            height: 100%;
+            transition: background-color 0.1s;
         }
 
-        .sim-btn:active {
-            background: #333336;
+        /* Aktiv snapshot i den aktiva kolumnen får grön färg */
+        .snap-btn.active {
+            background-color: var(--active-bg);
+            border-color: var(--active-bg);
+            box-shadow: 0 0 15px rgba(193, 255, 178, 0.4);
         }
     </style>
 </head>
@@ -188,40 +190,72 @@
         <div id="midiStatus" class="status">MIDI: SEARCHING...</div>
     </header>
 
-    <!-- De 4 stora knapparna i en rad -->
     <div class="grid-container">
-        <div class="strip" id="strip0" onclick="fakeMIDI(lastActiveBank * 4 + 0)">
-            <div class="strip-index" id="idx0">1A</div>
-            <div class="strip-name" id="name0">PRESET A</div>
+        <!-- PLATS 1 (A) -->
+        <div class="channel-column">
+            <div class="strip" id="preset0" onclick="fakeMIDI(lastActiveBank * 4 + 0)">
+                <div class="strip-index" id="pIdx0">1A</div>
+                <div class="strip-name" id="pName0">PRESET A</div>
+            </div>
+            <div class="snapshot-row">
+                <div class="snap-btn" id="snap-0-0" onclick="fakeCC(0)"></div>
+                <div class="snap-btn" id="snap-0-1" onclick="fakeCC(1)"></div>
+                <div class="snap-btn" id="snap-0-2" onclick="fakeCC(2)"></div>
+                <div class="snap-btn" id="snap-0-3" onclick="fakeCC(3)"></div>
+            </div>
         </div>
-        <div class="strip" id="strip1" onclick="fakeMIDI(lastActiveBank * 4 + 1)">
-            <div class="strip-index" id="idx1">1B</div>
-            <div class="strip-name" id="name1">PRESET B</div>
-        </div>
-        <div class="strip" id="strip2" onclick="fakeMIDI(lastActiveBank * 4 + 2)">
-            <div class="strip-index" id="idx2">1C</div>
-            <div class="strip-name" id="name2">PRESET C</div>
-        </div>
-        <div class="strip" id="strip3" onclick="fakeMIDI(lastActiveBank * 4 + 3)">
-            <div class="strip-index" id="idx3">1D</div>
-            <div class="strip-name" id="name3">PRESET D</div>
-        </div>
-    </div>
 
-    <!-- UTÖKADE STÖDKNAPPAR -->
-    <div class="simulator">
-        <button class="sim-btn" onclick="fakeMIDI(0)">Bank 1 (PC 0)</button>
-        <button class="sim-btn" onclick="fakeMIDI(4)">Bank 2 (PC 4)</button>
-        <button class="sim-btn" onclick="fakeMIDI(8)">Bank 3 (PC 8)</button>
-        <button class="sim-btn" onclick="fakeMIDI(12)">Bank 4 (PC 12)</button>
+        <!-- PLATS 2 (B) -->
+        <div class="channel-column">
+            <div class="strip" id="preset1" onclick="fakeMIDI(lastActiveBank * 4 + 1)">
+                <div class="strip-index" id="pIdx1">1B</div>
+                <div class="strip-name" id="pName1">PRESET B</div>
+            </div>
+            <div class="snapshot-row">
+                <div class="snap-btn" id="snap-1-0" onclick="fakeCC(0)"></div>
+                <div class="snap-btn" id="snap-1-1" onclick="fakeCC(1)"></div>
+                <div class="snap-btn" id="snap-1-2" onclick="fakeCC(2)"></div>
+                <div class="snap-btn" id="snap-1-3" onclick="fakeCC(3)"></div>
+            </div>
+        </div>
+
+        <!-- PLATS 3 (C) -->
+        <div class="channel-column">
+            <div class="strip" id="preset2" onclick="fakeMIDI(lastActiveBank * 4 + 2)">
+                <div class="strip-index" id="pIdx2">1C</div>
+                <div class="strip-name" id="pName2">PRESET C</div>
+            </div>
+            <div class="snapshot-row">
+                <div class="snap-btn" id="snap-2-0" onclick="fakeCC(0)"></div>
+                <div class="snap-btn" id="snap-2-1" onclick="fakeCC(1)"></div>
+                <div class="snap-btn" id="snap-2-2" onclick="fakeCC(2)"></div>
+                <div class="snap-btn" id="snap-2-3" onclick="fakeCC(3)"></div>
+            </div>
+        </div>
+
+        <!-- PLATS 4 (D) -->
+        <div class="channel-column">
+            <div class="strip" id="preset3" onclick="fakeMIDI(lastActiveBank * 4 + 3)">
+                <div class="strip-index" id="pIdx3">1D</div>
+                <div class="strip-name" id="pName3">PRESET D</div>
+            </div>
+            <div class="snapshot-row">
+                <div class="snap-btn" id="snap-3-0" onclick="fakeCC(0)"></div>
+                <div class="snap-btn" id="snap-3-1" onclick="fakeCC(1)"></div>
+                <div class="snap-btn" id="snap-3-2" onclick="fakeCC(2)"></div>
+                <div class="snap-btn" id="snap-3-3" onclick="fakeCC(3)"></div>
+            </div>
+        </div>
     </div>
 
     <script>
-        let presetMap = {};
+        let fullHelixData = {}; 
+        let presetMap = {};     
         let lastActivePC = 0;
         let lastActiveBank = 0;
+        let lastActiveSnapshot = 0; 
 
-        function initFallbackPresets() {
+        function initFallbackData() {
             for (let i = 0; i < 128; i++) {
                 let bankNum = Math.floor(i / 4) + 1;
                 let bankChar = String.fromCharCode(65 + (i % 4));
@@ -232,68 +266,30 @@
         if (localStorage.getItem('helixPresets')) {
             presetMap = JSON.parse(localStorage.getItem('helixPresets'));
         } else {
-            initFallbackPresets();
+            initFallbackData();
         }
+
+        if (localStorage.getItem('helixFullData')) {
+            fullHelixData = JSON.parse(localStorage.getItem('helixFullData'));
+        }
+
+        // Starta vyn
+        updateDisplay(0);
 
         // Filimport
         document.getElementById('fileInput').addEventListener('change', function(e) {
-            const file = e.target.files;
-            if (!file) return;
+            const files = e.target.files;
+            if (!files || files.length === 0) return;
+            const file = files[0];
 
             const reader = new FileReader();
             reader.onload = function(evt) {
                 try {
                     const data = JSON.parse(evt.target.result);
+                    fullHelixData = data;
+                    localStorage.setItem('helixFullData', JSON.stringify(data));
+
                     if (data.meta && data.meta.name) {
-                        presetMap = data.meta.name;
+                        presetMap[0] = data.meta.name;
                         alert(`Imported single preset: "${data.meta.name}" to 1A`);
                     } else if (data.presets && Array.isArray(data.presets)) {
-                        data.presets.forEach((p, index) => {
-                            if (p && p.meta && p.meta.name && index < 128) {
-                                presetMap[index] = p.meta.name;
-                            }
-                        });
-                        alert(`Successfully imported setlist with ${data.presets.length} presets!`);
-                    }
-                    localStorage.setItem('helixPresets', JSON.stringify(presetMap));
-                    updateDisplay(lastActivePC);
-                } catch (error) {
-                    alert("Error reading file. Please use a valid Helix JSON file.");
-                }
-            };
-            reader.readAsText(file);
-        });
-
-        // Uppdatera skärmen
-        function updateDisplay(currentPC) {
-            lastActivePC = currentPC;
-            lastActiveBank = Math.floor(currentPC / 4);
-            
-            const startPCInBank = lastActiveBank * 4;
-            const bankDisplayNum = lastActiveBank + 1;
-
-            for (let i = 0; i < 4; i++) {
-                const targetPC = startPCInBank + i;
-                const stripElement = document.getElementById(`strip${i}`);
-                const nameElement = document.getElementById(`name${i}`);
-                const idxElement = document.getElementById(`idx${i}`);
-
-                idxElement.innerText = `${bankDisplayNum}${String.fromCharCode(65 + i)}`;
-                nameElement.innerText = presetMap[targetPC] || "Empty";
-
-                if (targetPC === currentPC) {
-                    stripElement.classList.add('active');
-                } else {
-                    stripElement.classList.remove('active');
-                }
-            }
-        }
-
-        // Web MIDI API
-        if (navigator.requestMIDIAccess) {
-            navigator.requestMIDIAccess({ bluetooth: true }).then(onMIDISuccess, () => {});
-        }
-
-        function onMIDISuccess(midiAccess) {
-            const statusDiv = document.getElementById('midiStatus');
-            const inputs = midiAccess.inputs.values();
