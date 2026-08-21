@@ -18,6 +18,12 @@
             --active-bg: #c1ffb2;  /* Ljusgrön färg för aktiva val */
             --border-color: #222222;
             --snap-inactive: #333336; /* Mörkgrå för inaktiva snapshots */
+
+            /* De nya färgerna för aktiva snapshots */
+            --snap-color-0: #ff3b30; /* Röd */
+            --snap-color-1: #007aff; /* Blå */
+            --snap-color-2: #4cd964; /* Ljusgrön */
+            --snap-color-3: #008726; /* Mörkgrön */
         }
 
         * {
@@ -93,7 +99,7 @@
             gap: 12px;
             flex-grow: 1;
             width: 100%;
-            height: 85%; /* Upptar nu nästan hela skärmen */
+            height: 85%;
             margin-bottom: 5px;
         }
 
@@ -172,11 +178,29 @@
             transition: background-color 0.1s;
         }
 
-        /* Aktiv snapshot i den aktiva kolumnen får grön färg */
-        .snap-btn.active {
-            background-color: var(--active-bg);
-            border-color: var(--active-bg);
-            box-shadow: 0 0 15px rgba(193, 255, 178, 0.4);
+        /* Unika färg-klasser för de aktiva knapparna */
+        .snap-btn.col-0.active {
+            background-color: var(--snap-color-0);
+            border-color: var(--snap-color-0);
+            box-shadow: 0 0 15px rgba(255, 59, 48, 0.5);
+        }
+
+        .snap-btn.col-1.active {
+            background-color: var(--snap-color-1);
+            border-color: var(--snap-color-1);
+            box-shadow: 0 0 15px rgba(0, 122, 255, 0.5);
+        }
+
+        .snap-btn.col-2.active {
+            background-color: var(--snap-color-2);
+            border-color: var(--snap-color-2);
+            box-shadow: 0 0 15px rgba(76, 217, 100, 0.5);
+        }
+
+        .snap-btn.col-3.active {
+            background-color: var(--snap-color-3);
+            border-color: var(--snap-color-3);
+            box-shadow: 0 0 15px rgba(0, 135, 38, 0.5);
         }
     </style>
 </head>
@@ -187,109 +211,92 @@
             <button class="btn">Import Helix File (.hlx/.hls)</button>
             <input type="file" id="fileInput" accept=".hlx,.hls">
         </div>
-        <div id="midiStatus" class="status">MIDI: SEARCHING...</div>
+        <div id="midiStatus" class="status">MIDI: NOT SUPPORTED</div>
     </header>
 
     <div class="grid-container">
         <!-- PLATS 1 (A) -->
         <div class="channel-column">
-            <div class="strip" id="preset0" onclick="fakeMIDI(lastActiveBank * 4 + 0)">
+            <div class="strip" id="preset0">
                 <div class="strip-index" id="pIdx0">1A</div>
                 <div class="strip-name" id="pName0">PRESET A</div>
             </div>
             <div class="snapshot-row">
-                <div class="snap-btn" id="snap-0-0" onclick="fakeCC(0)"></div>
-                <div class="snap-btn" id="snap-0-1" onclick="fakeCC(1)"></div>
-                <div class="snap-btn" id="snap-0-2" onclick="fakeCC(2)"></div>
-                <div class="snap-btn" id="snap-0-3" onclick="fakeCC(3)"></div>
+                <div class="snap-btn col-0" id="snap-0-0"></div>
+                <div class="snap-btn col-1" id="snap-0-1"></div>
+                <div class="snap-btn col-2" id="snap-0-2"></div>
+                <div class="snap-btn col-3" id="snap-0-3"></div>
             </div>
         </div>
 
         <!-- PLATS 2 (B) -->
         <div class="channel-column">
-            <div class="strip" id="preset1" onclick="fakeMIDI(lastActiveBank * 4 + 1)">
+            <div class="strip" id="preset1">
                 <div class="strip-index" id="pIdx1">1B</div>
                 <div class="strip-name" id="pName1">PRESET B</div>
             </div>
             <div class="snapshot-row">
-                <div class="snap-btn" id="snap-1-0" onclick="fakeCC(0)"></div>
-                <div class="snap-btn" id="snap-1-1" onclick="fakeCC(1)"></div>
-                <div class="snap-btn" id="snap-1-2" onclick="fakeCC(2)"></div>
-                <div class="snap-btn" id="snap-1-3" onclick="fakeCC(3)"></div>
+                <div class="snap-btn col-0" id="snap-1-0"></div>
+                <div class="snap-btn col-1" id="snap-1-1"></div>
+                <div class="snap-btn col-2" id="snap-1-2"></div>
+                <div class="snap-btn col-3" id="snap-1-3"></div>
             </div>
         </div>
 
         <!-- PLATS 3 (C) -->
         <div class="channel-column">
-            <div class="strip" id="preset2" onclick="fakeMIDI(lastActiveBank * 4 + 2)">
+            <div class="strip" id="preset2">
                 <div class="strip-index" id="pIdx2">1C</div>
                 <div class="strip-name" id="pName2">PRESET C</div>
             </div>
             <div class="snapshot-row">
-                <div class="snap-btn" id="snap-2-0" onclick="fakeCC(0)"></div>
-                <div class="snap-btn" id="snap-2-1" onclick="fakeCC(1)"></div>
-                <div class="snap-btn" id="snap-2-2" onclick="fakeCC(2)"></div>
-                <div class="snap-btn" id="snap-2-3" onclick="fakeCC(3)"></div>
+                <div class="snap-btn col-0" id="snap-2-0"></div>
+                <div class="snap-btn col-1" id="snap-2-1"></div>
+                <div class="snap-btn col-2" id="snap-2-2"></div>
+                <div class="snap-btn col-3" id="snap-2-3"></div>
             </div>
         </div>
 
         <!-- PLATS 4 (D) -->
         <div class="channel-column">
-            <div class="strip" id="preset3" onclick="fakeMIDI(lastActiveBank * 4 + 3)">
+            <div class="strip" id="preset3">
                 <div class="strip-index" id="pIdx3">1D</div>
                 <div class="strip-name" id="pName3">PRESET D</div>
             </div>
             <div class="snapshot-row">
-                <div class="snap-btn" id="snap-3-0" onclick="fakeCC(0)"></div>
-                <div class="snap-btn" id="snap-3-1" onclick="fakeCC(1)"></div>
-                <div class="snap-btn" id="snap-3-2" onclick="fakeCC(2)"></div>
-                <div class="snap-btn" id="snap-3-3" onclick="fakeCC(3)"></div>
+                <div class="snap-btn col-0" id="snap-3-0"></div>
+                <div class="snap-btn col-1" id="snap-3-1"></div>
+                <div class="snap-btn col-2" id="snap-3-2"></div>
+                <div class="snap-btn col-3" id="snap-3-3"></div>
             </div>
         </div>
     </div>
 
     <script>
-        let fullHelixData = {}; 
-        let presetMap = {};     
-        let lastActivePC = 0;
-        let lastActiveBank = 0;
-        let lastActiveSnapshot = 0; 
+        let currentPresetColumn = 0; // Håller reda på vilken kolumn (0-3) som är aktiv baserat på din Helix-bank
 
-        function initFallbackData() {
-            for (let i = 0; i < 128; i++) {
-                let bankNum = Math.floor(i / 4) + 1;
-                let bankChar = String.fromCharCode(65 + (i % 4));
-                presetMap[i] = `${bankNum}${bankChar} Preset`;
+        // Funktion för att visuellt tända en Preset-kolumn (0 till 3)
+        function updateActivePresetUI(columnNum) {
+            for (let i = 0; i < 4; i++) {
+                document.getElementById(`preset${i}`).classList.remove('active');
+            }
+            const activeStrip = document.getElementById(`preset${columnNum}`);
+            if (activeStrip) {
+                activeStrip.classList.add('active');
+                currentPresetColumn = columnNum;
             }
         }
 
-        if (localStorage.getItem('helixPresets')) {
-            presetMap = JSON.parse(localStorage.getItem('helixPresets'));
-        } else {
-            initFallbackData();
+        // Funktion för att tända en Snapshot i den AKTIVA preset-kolumnen
+        function updateActiveSnapshotUI(snapNum) {
+            // Ta bort gammalt ljus från ALLA snapshot-knappar
+            document.querySelectorAll('.snap-btn').forEach(btn => btn.classList.remove('active'));
+
+            // Tänd den valda knappen just i den kolumn som Helix har valt
+            const targetSnap = document.getElementById(`snap-${currentPresetColumn}-${snapNum}`);
+            if (targetSnap) {
+                targetSnap.classList.add('active');
+            }
         }
 
-        if (localStorage.getItem('helixFullData')) {
-            fullHelixData = JSON.parse(localStorage.getItem('helixFullData'));
-        }
-
-        // Starta vyn
-        updateDisplay(0);
-
-        // Filimport
-        document.getElementById('fileInput').addEventListener('change', function(e) {
-            const files = e.target.files;
-            if (!files || files.length === 0) return;
-            const file = files[0];
-
-            const reader = new FileReader();
-            reader.onload = function(evt) {
-                try {
-                    const data = JSON.parse(evt.target.result);
-                    fullHelixData = data;
-                    localStorage.setItem('helixFullData', JSON.stringify(data));
-
-                    if (data.meta && data.meta.name) {
-                        presetMap[0] = data.meta.name;
-                        alert(`Imported single preset: "${data.meta.name}" to 1A`);
-                    } else if (data.presets && Array.isArray(data.presets)) {
+        // --- WEB MIDI LOGIK ---
