@@ -2,28 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Helix Display</title>
-
-    <!-- PWA-inställningar för fristående app på iPhone -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Helix Display">
-
     <style>
         :root {
             --bg-color: #0a0a0a;
-            --panel-color: #b0b0b0; /* Ljusgrå för inaktiva presets */
-            --text-main: #000000;  /* Svart text */
-            --active-bg: #c1ffb2;  /* Ljusgrön färg för aktiva val */
+            --panel-color: #b0b0b0; 
+            --text-main: #000000;  
+            --active-bg: #c1ffb2;  
             --border-color: #222222;
-            --snap-inactive: #333336; /* Mörkgrå för inaktiva snapshots */
-
-            /* Färger för aktiva snapshots */
-            --snap-color-0: #ff3b30; /* Röd */
-            --snap-color-1: #007aff; /* Blå */
-            --snap-color-2: #4cd964; /* Ljusgrön */
-            --snap-color-3: #008726; /* Mörkgrön */
+            --snap-inactive: #333336; 
+            --snap-color-0: #ff3b30; 
+            --snap-color-1: #007aff; 
+            --snap-color-2: #4cd964; 
+            --snap-color-3: #008726; 
         }
 
         * {
@@ -36,32 +28,26 @@
 
         body {
             background-color: var(--bg-color);
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             color: #ffffff;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            
-            /* Säkrar att appen tar exakt 100% av skärmen oavsett telefon */
             height: 100vh;
             width: 100vw;
-            height: 100dvh;
-            width: 100dvw;
-            
-            /* Anpassat för liggande läge med safe-area runt skärmkanter/notch */
-            padding: 8px calc(env(safe-area-inset-right) + 12px) calc(env(safe-area-inset-bottom) + 4px) calc(env(safe-area-inset-left) + 12px);
+            padding: 15px;
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 6px 12px;
-            margin-bottom: 8px;
+            padding: 10px 15px;
+            margin-bottom: 12px;
             background: #111;
             border-radius: 6px;
-            font-size: 12px;
-            flex-shrink: 0; /* Hindrar headern från att tryckas ihop */
+            font-size: 13px;
+            flex-shrink: 0;
         }
 
         .status {
@@ -74,11 +60,6 @@
             color: #4cd964;
         }
 
-        .header-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
         .file-input-wrapper {
             position: relative;
             overflow: hidden;
@@ -88,18 +69,11 @@
             background: #222;
             color: #aaa;
             border: 1px solid #333;
-            padding: 6px 12px;
+            padding: 6px 14px;
             border-radius: 4px;
-            font-size: 11px;
+            font-size: 12px;
             cursor: pointer;
             font-weight: bold;
-        }
-        
-        /* Startknapp för att låsa upp MIDI på mobiler */
-        .btn-start {
-            background: #007aff;
-            color: #fff;
-            border: none;
         }
 
         .file-input-wrapper input[type=file] {
@@ -112,28 +86,27 @@
             width: 100%;
         }
 
-        /* HUVUDGRID: Optimerad för liggande läge (Landscape) */
+        /* GRID: Säkrar att allt syns på bredden utan scroll */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            flex-grow: 1; /* Tar upp allt resterande utrymme på skärmen */
+            gap: 15px;
+            flex-grow: 1; 
             width: 100%;
-            height: 100%;
-            min-height: 0; /* Fixar layout-buggar i flexbox */
+            height: calc(100% - 60px); 
+            min-height: 0; 
         }
 
         .channel-column {
             display: flex;
             flex-direction: column;
             height: 100%;
-            gap: 8px;
+            gap: 10px;
             min-height: 0;
         }
 
-        /* PRESET-DISPLAY (Tar upp ca 70% av kolumnens höjd) */
+        /* PRESET-DISPLAY */
         .strip {
-            flex-grow: 7;
             height: 70%;
             background-color: var(--panel-color);
             border: 2px solid var(--border-color);
@@ -143,23 +116,22 @@
             justify-content: center;
             align-items: center;
             position: relative;
-            padding: 10px;
+            padding: 15px;
             min-height: 0;
         }
 
         .strip-index {
             position: absolute;
-            top: 8px;
-            left: 10px;
-            font-size: 16px;
+            top: 10px;
+            left: 12px;
+            font-size: 18px;
             font-weight: bold;
             color: var(--text-main);
             opacity: 0.5;
         }
 
         .strip-name {
-            /* Dynamisk textstorlek baserad på skärmens bredd i liggande läge */
-            font-size: 3.5vw; 
+            font-size: 3vw; 
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -169,7 +141,6 @@
             overflow: hidden;
             text-overflow: ellipsis;
             width: 100%;
-            padding: 0 5px;
         }
 
         .strip.active {
@@ -182,13 +153,12 @@
             opacity: 1;
         }
 
-        /* SNAPSHOT-DISPLAY (Tar upp ca 30% av kolumnens höjd) */
+        /* SNAPSHOT-DISPLAY */
         .snapshot-row {
-            flex-grow: 3;
             height: 30%;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 6px;
+            gap: 8px;
             min-height: 0;
         }
 
@@ -200,98 +170,53 @@
             transition: background-color 0.05s;
         }
 
-        .snap-btn.col-0.active {
-            background-color: var(--snap-color-0);
-            border-color: var(--snap-color-0);
-            box-shadow: 0 0 15px rgba(255, 59, 48, 0.6);
-        }
-
-        .snap-btn.col-1.active {
-            background-color: var(--snap-color-1);
-            border-color: var(--snap-color-1);
-            box-shadow: 0 0 15px rgba(0, 122, 255, 0.6);
-        }
-
-        .snap-btn.col-2.active {
-            background-color: var(--snap-color-2);
-            border-color: var(--snap-color-2);
-            box-shadow: 0 0 15px rgba(76, 217, 100, 0.6);
-        }
-
-        .snap-btn.col-3.active {
-            background-color: var(--snap-color-3);
-            border-color: var(--snap-color-3);
-            box-shadow: 0 0 15px rgba(0, 135, 38, 0.6);
-        }
+        .snap-btn.col-0.active { background-color: var(--snap-color-0); border-color: var(--snap-color-0); box-shadow: 0 0 15px rgba(255, 59, 48, 0.6); }
+        .snap-btn.col-1.active { background-color: var(--snap-color-1); border-color: var(--snap-color-1); box-shadow: 0 0 15px rgba(0, 122, 255, 0.6); }
+        .snap-btn.col-2.active { background-color: var(--snap-color-2); border-color: var(--snap-color-2); box-shadow: 0 0 15px rgba(76, 217, 100, 0.6); }
+        .snap-btn.col-3.active { background-color: var(--snap-color-3); border-color: var(--snap-color-3); box-shadow: 0 0 15px rgba(0, 135, 38, 0.6); }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="header-buttons">
-            <button class="btn btn-start" id="startMidiBtn">Klicka för att starta display</button>
-            <div class="file-input-wrapper">
-                <button class="btn">Import Setlist (.hls)</button>
-                <input type="file" id="fileInput" accept=".hls">
-            </div>
+        <div class="file-input-wrapper">
+            <button class="btn">Import Setlist (.hls)</button>
+            <input type="file" id="fileInput" accept=".hls">
         </div>
-        <div id="midiStatus" class="status">MIDI: KLICKA PÅ STARTA</div>
+        <div id="midiStatus" class="status">MIDI: SÖKER HELIX...</div>
     </header>
 
     <div class="grid-container">
         <!-- PLATS 1 (A) -->
         <div class="channel-column">
-            <div class="strip" id="preset0">
-                <div class="strip-index">1A</div>
-                <div class="strip-name" id="pName0">CLEAN RHYTHM</div>
-            </div>
+            <div class="strip" id="preset0"><div class="strip-index">1A</div><div class="strip-name" id="pName0">CLEAN RHYTHM</div></div>
             <div class="snapshot-row">
-                <div class="snap-btn col-0" id="snap-0-0"></div>
-                <div class="snap-btn col-1" id="snap-0-1"></div>
-                <div class="snap-btn col-2" id="snap-0-2"></div>
-                <div class="snap-btn col-3" id="snap-0-3"></div>
+                <div class="snap-btn col-0" id="snap-0-0"></div><div class="snap-btn col-1" id="snap-0-1"></div>
+                <div class="snap-btn col-2" id="snap-0-2"></div><div class="snap-btn col-3" id="snap-0-3"></div>
             </div>
         </div>
-
         <!-- PLATS 2 (B) -->
         <div class="channel-column">
-            <div class="strip" id="preset1">
-                <div class="strip-index">1B</div>
-                <div class="strip-name" id="pName1">CRUNCH DRIVE</div>
-            </div>
+            <div class="strip" id="preset1"><div class="strip-index">1B</div><div class="strip-name" id="pName1">CRUNCH DRIVE</div></div>
             <div class="snapshot-row">
-                <div class="snap-btn col-0" id="snap-1-0"></div>
-                <div class="snap-btn col-1" id="snap-1-1"></div>
-                <div class="snap-btn col-2" id="snap-1-2"></div>
-                <div class="snap-btn col-3" id="snap-1-3"></div>
+                <div class="snap-btn col-0" id="snap-1-0"></div><div class="snap-btn col-1" id="snap-1-1"></div>
+                <div class="snap-btn col-2" id="snap-1-2"></div><div class="snap-btn col-3" id="snap-1-3"></div>
             </div>
         </div>
-
         <!-- PLATS 3 (C) -->
         <div class="channel-column">
-            <div class="strip" id="preset2">
-                <div class="strip-index">1C</div>
-                <div class="strip-name" id="pName2">HEAVY LEAD</div>
-            </div>
+            <div class="strip" id="preset2"><div class="strip-index">1C</div><div class="strip-name" id="pName2">HEAVY LEAD</div></div>
             <div class="snapshot-row">
-                <div class="snap-btn col-0" id="snap-2-0"></div>
-                <div class="snap-btn col-1" id="snap-2-1"></div>
-                <div class="snap-btn col-2" id="snap-2-2"></div>
-                <div class="snap-btn col-3" id="snap-2-3"></div>
+                <div class="snap-btn col-0" id="snap-2-0"></div><div class="snap-btn col-1" id="snap-2-1"></div>
+                <div class="snap-btn col-2" id="snap-2-2"></div><div class="snap-btn col-3" id="snap-2-3"></div>
             </div>
         </div>
-
         <!-- PLATS 4 (D) -->
         <div class="channel-column">
-            <div class="strip" id="preset3">
-                <div class="strip-index">1D</div>
-                <div class="strip-name" id="pName3">AMBIENT PAD</div>
-            </div>
+            <div class="strip" id="preset3"><div class="strip-index">1D</div><div class="strip-name" id="pName3">AMBIENT PAD</div></div>
             <div class="snapshot-row">
-                <div class="snap-btn col-0" id="snap-3-0"></div>
-                <div class="snap-btn col-1" id="snap-3-1"></div>
-                <div class="snap-btn col-2" id="snap-3-2"></div>
-                <div class="snap-btn col-3" id="snap-3-3"></div>
+                <div class="snap-btn col-0" id="snap-3-0"></div><div class="snap-btn col-1" id="snap-3-1"></div>
+                <div class="snap-btn col-2" id="snap-3-2"></div><div class="snap-btn col-3" id="snap-3-3"></div>
             </div>
         </div>
     </div>
@@ -299,6 +224,66 @@
     <script>
         let activePresetIndex = 0;
 
-        // Användaren MÅSTE klicka på skärmen en gång för att mobilen ska tillåta MIDI
-        document.getElementById('startMidiBtn').addEventListener('click', function() {
-            if (navigator.requestMIDIAccess) {
+        // På PC (speciellt i en fristående app) behövs ingen startknapp! Vi kör direkt.
+        if (navigator.requestMIDIAccess) {
+            navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
+        } else {
+            document.getElementById('midiStatus').innerText = "MIDI: STÖDS EJ";
+        }
+
+        function onMIDISuccess(midiAccess) {
+            midiAccess.onstatechange = () => setupMidiInputs(midiAccess);
+            setupMidiInputs(midiAccess);
+        }
+
+        function setupMidiInputs(midiAccess) {
+            const inputs = Array.from(midiAccess.inputs.values());
+            if (inputs.length > 0) {
+                document.getElementById('midiStatus').innerText = "MIDI: LYSSNAR PÅ HELIX";
+                document.getElementById('midiStatus').classList.add('connected');
+                inputs.forEach(input => {
+                    input.onmidimessage = handleMidiMessage;
+                });
+            } else {
+                document.getElementById('midiStatus').innerText = "INGEN ENHET FUNNEN";
+                document.getElementById('midiStatus').classList.remove('connected');
+            }
+        }
+
+        function onMIDIFailure() {
+            document.getElementById('midiStatus').innerText = "MIDI: ÅTKOMST NEKAD";
+        }
+
+        function handleMidiMessage(event) {
+            const data = event.data;
+            if (!data || data.length < 2) return;
+
+            const command = data[0] & 0xF0; 
+
+            // PC (Program Change) - Byta preset
+            if (command === 0xC0) {
+                const pcValue = data[1]; 
+                if (pcValue >= 0 && pcValue <= 3) {
+                    updateActivePresetUI(pcValue);
+                }
+            }
+
+            // CC (Control Change) - Byta snapshot
+            if (command === 0xB0 && data.length >= 3) {
+                const ccNumber = data[1];
+                const ccValue = data[2];
+
+                if (ccNumber === 69 && ccValue >= 0 && ccValue <= 3) {
+                    updateSnapshotUI(activePresetIndex, ccValue);
+                }
+            }
+        }
+
+        function updateActivePresetUI(presetNumber) {
+            activePresetIndex = presetNumber;
+            for (let i = 0; i < 4; i++) {
+                const strip = document.getElementById(`preset${i}`);
+                if (i === presetNumber) {
+                    strip.classList.add('active');
+                } else {
+                    strip.classList.remove('active');
