@@ -41,20 +41,27 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            
+            /* Säkrar att appen tar exakt 100% av skärmen oavsett telefon */
             height: 100vh;
             width: 100vw;
-            padding: calc(env(safe-area-inset-top) + 10px) 10px calc(env(safe-area-inset-bottom) + 10px) 10px;
+            height: 100dvh;
+            width: 100dvw;
+            
+            /* Anpassat för liggande läge med safe-area runt skärmkanter/notch */
+            padding: 8px calc(env(safe-area-inset-right) + 12px) calc(env(safe-area-inset-bottom) + 4px) calc(env(safe-area-inset-left) + 12px);
         }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 4px 10px;
+            padding: 6px 12px;
             margin-bottom: 8px;
             background: #111;
             border-radius: 6px;
-            font-size: 11px;
+            font-size: 12px;
+            flex-shrink: 0; /* Hindrar headern från att tryckas ihop */
         }
 
         .status {
@@ -67,6 +74,11 @@
             color: #4cd964;
         }
 
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
         .file-input-wrapper {
             position: relative;
             overflow: hidden;
@@ -76,9 +88,18 @@
             background: #222;
             color: #aaa;
             border: 1px solid #333;
-            padding: 4px 10px;
+            padding: 6px 12px;
             border-radius: 4px;
             font-size: 11px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        /* Startknapp för att låsa upp MIDI på mobiler */
+        .btn-start {
+            background: #007aff;
+            color: #fff;
+            border: none;
         }
 
         .file-input-wrapper input[type=file] {
@@ -91,50 +112,54 @@
             width: 100%;
         }
 
-        /* HUVUDGRID: 4 kolumner */
+        /* HUVUDGRID: Optimerad för liggande läge (Landscape) */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 12px;
-            flex-grow: 1;
+            flex-grow: 1; /* Tar upp allt resterande utrymme på skärmen */
             width: 100%;
-            height: 85%;
-            margin-bottom: 5px;
+            height: 100%;
+            min-height: 0; /* Fixar layout-buggar i flexbox */
         }
 
         .channel-column {
             display: flex;
             flex-direction: column;
             height: 100%;
-            gap: 10px;
+            gap: 8px;
+            min-height: 0;
         }
 
-        /* PRESET-DISPLAY */
+        /* PRESET-DISPLAY (Tar upp ca 70% av kolumnens höjd) */
         .strip {
-            height: 75%; 
+            flex-grow: 7;
+            height: 70%;
             background-color: var(--panel-color);
             border: 2px solid var(--border-color);
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             position: relative;
-            padding: 15px;
+            padding: 10px;
+            min-height: 0;
         }
 
         .strip-index {
             position: absolute;
-            top: 12px;
-            left: 12px;
-            font-size: 14px;
+            top: 8px;
+            left: 10px;
+            font-size: 16px;
             font-weight: bold;
             color: var(--text-main);
-            opacity: 0.6;
+            opacity: 0.5;
         }
 
         .strip-name {
-            font-size: 4.2vw; 
+            /* Dynamisk textstorlek baserad på skärmens bredd i liggande läge */
+            font-size: 3.5vw; 
             font-weight: 900;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -144,24 +169,27 @@
             overflow: hidden;
             text-overflow: ellipsis;
             width: 100%;
+            padding: 0 5px;
         }
 
         .strip.active {
             background-color: var(--active-bg);
             border-color: var(--active-bg);
-            box-shadow: 0 0 30px rgba(193, 255, 178, 0.3);
+            box-shadow: 0 0 25px rgba(193, 255, 178, 0.4);
         }
 
         .strip.active .strip-index {
             opacity: 1;
         }
 
-        /* SNAPSHOT-DISPLAY */
+        /* SNAPSHOT-DISPLAY (Tar upp ca 30% av kolumnens höjd) */
         .snapshot-row {
-            height: 25%;
+            flex-grow: 3;
+            height: 30%;
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 6px;
+            min-height: 0;
         }
 
         .snap-btn {
@@ -169,42 +197,45 @@
             border: 1px solid #222;
             border-radius: 6px;
             height: 100%;
-            transition: background-color 0.1s;
+            transition: background-color 0.05s;
         }
 
         .snap-btn.col-0.active {
             background-color: var(--snap-color-0);
             border-color: var(--snap-color-0);
-            box-shadow: 0 0 15px rgba(255, 59, 48, 0.5);
+            box-shadow: 0 0 15px rgba(255, 59, 48, 0.6);
         }
 
         .snap-btn.col-1.active {
             background-color: var(--snap-color-1);
             border-color: var(--snap-color-1);
-            box-shadow: 0 0 15px rgba(0, 122, 255, 0.5);
+            box-shadow: 0 0 15px rgba(0, 122, 255, 0.6);
         }
 
         .snap-btn.col-2.active {
             background-color: var(--snap-color-2);
             border-color: var(--snap-color-2);
-            box-shadow: 0 0 15px rgba(76, 217, 100, 0.5);
+            box-shadow: 0 0 15px rgba(76, 217, 100, 0.6);
         }
 
         .snap-btn.col-3.active {
             background-color: var(--snap-color-3);
             border-color: var(--snap-color-3);
-            box-shadow: 0 0 15px rgba(0, 135, 38, 0.5);
+            box-shadow: 0 0 15px rgba(0, 135, 38, 0.6);
         }
     </style>
 </head>
 <body>
 
     <header>
-        <div class="file-input-wrapper">
-            <button class="btn">Import Setlist (.hls)</button>
-            <input type="file" id="fileInput" accept=".hls">
+        <div class="header-buttons">
+            <button class="btn btn-start" id="startMidiBtn">Klicka för att starta display</button>
+            <div class="file-input-wrapper">
+                <button class="btn">Import Setlist (.hls)</button>
+                <input type="file" id="fileInput" accept=".hls">
+            </div>
         </div>
-        <div id="midiStatus" class="status">MIDI: INITIALIZING...</div>
+        <div id="midiStatus" class="status">MIDI: KLICKA PÅ STARTA</div>
     </header>
 
     <div class="grid-container">
@@ -266,42 +297,8 @@
     </div>
 
     <script>
-        let activePresetIndex = 0; // Håller reda på vilken kolumn som körs
+        let activePresetIndex = 0;
 
-        // Starta MIDI-lyssnare
-        if (navigator.requestMIDIAccess) {
-            navigator.requestMIDIAccess().then(onMIDISuccess, onMIDIFailure);
-        } else {
-            document.getElementById('midiStatus').innerText = "MIDI: NOT SUPPORTED";
-        }
-
-        function onMIDISuccess(midiAccess) {
-            const inputs = Array.from(midiAccess.inputs.values());
-            if (inputs.length > 0) {
-                document.getElementById('midiStatus').innerText = "MIDI: LISTENING...";
-                document.getElementById('midiStatus').classList.add('connected');
-                
-                // Lyssna på ALLA inkommande MIDI-enheter
-                inputs.forEach(input => {
-                    input.onmidimessage = handleMidiMessage;
-                });
-            } else {
-                document.getElementById('midiStatus').innerText = "MIDI: NO INPUT DEVICES";
-            }
-        }
-
-        function onMIDIFailure() {
-            document.getElementById('midiStatus').innerText = "MIDI: ACCESS DENIED";
-        }
-
-        // Tolka MIDI-data från Helix
-        function handleMidiMessage(event) {
-            const data = event.data;
-            if (!data || data.length < 2) return;
-
-            const statusByte = data[0];
-            const command = statusByte & 0xF0; // Maskar ut kanalen
-
-            // 1. LYSSNA PÅ PRESET-BYTEN (Program Change = 0xC0)
-            if (command === 0xC0) {
-                const pcValue = data[1]; 
+        // Användaren MÅSTE klicka på skärmen en gång för att mobilen ska tillåta MIDI
+        document.getElementById('startMidiBtn').addEventListener('click', function() {
+            if (navigator.requestMIDIAccess) {
